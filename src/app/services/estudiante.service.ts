@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Estudiante } from '../models/estudiante.model';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +13,13 @@ export class EstudianteService {
   constructor(private http: HttpClient) { }
 
   // Obtener todos
-  getEstudiantes(): Observable<Estudiante[]> {
-    return this.http.get<Estudiante[]>(this.apiUrl);
+ getEstudiantes(buscar?: string): Observable<Estudiante[]> {
+  let params = new HttpParams();
+  if (buscar) {
+    params = params.set('buscar', buscar);
   }
+  return this.http.get<Estudiante[]>(this.apiUrl, { params });
+}
 
   // Crear uno nuevo
   crearEstudiante(estudiante: Estudiante): Observable<Estudiante> {

@@ -21,7 +21,9 @@ export class EstudianteCrudComponent implements OnInit {
   carrera: ''
 };
 
-  editando: boolean = false; // Bandera para saber si registramos o editamos
+  matriculaBuscar: number | null = null;
+  filtrado: boolean = false;
+  editando: boolean = false;
 
   constructor(private estudianteService: EstudianteService) { }
 
@@ -79,5 +81,30 @@ export class EstudianteCrudComponent implements OnInit {
     carrera: '' 
   };
   this.editando = false;
+}
+
+buscarPorMatricula(): void {
+  if (!this.matriculaBuscar) {
+    this.restaurarLista();
+    return;
+  }
+
+  this.estudianteService.getEstudiantes(this.matriculaBuscar.toString()).subscribe({
+    next: (res) => {
+      this.estudiantes = res;
+      this.filtrado = true;
+    },
+    error: (err) => {
+      console.error('Error al buscar al alumno en el servidor', err);
+      this.estudiantes = []; // Limpia la tabla si hay error o no lo encuentra
+      this.filtrado = true;
+    }
+  });
+}
+
+restaurarLista(): void {
+  this.matriculaBuscar = null;
+  this.filtrado = false;
+  this.listar(); // Llama a tu función original que descarga todos los estudiantes
 }
 }
