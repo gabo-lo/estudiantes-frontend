@@ -1,0 +1,94 @@
+<div class="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-lg font-sans">
+  
+  <h2 class="text-3xl font-bold border-b-4 border-blue-600 pb-3 text-blue-800 mb-6">
+    Sistema de Control Escolar - CRUD Estudiantes
+  </h2>
+
+  <div class="bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200 shadow-sm">
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">
+      {{ editando ? '📝 Modificar Registro' : '➕ Registrar Nuevo Estudiante' }}
+    </h3>
+    <form #miFormulario="ngForm" (ngSubmit)="miFormulario.form.valid && guardar()" class="flex flex-col md:flex-row gap-4 items-end">
+  
+  <div class="w-full md:flex-1">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Matrícula (10 dígitos):</label>
+    <input type="number" name="matricula" [(ngModel)]="estudianteForm.matricula" [disabled]="editando" 
+           required min="1000000000" max="9999999999" #mat="ngModel"
+           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200 disabled:text-gray-500"
+           [class.border-red-500]="mat.invalid && (mat.dirty || mat.touched)"
+           [class.border-gray-300]="mat.valid || !(mat.dirty || mat.touched)"
+           placeholder="Ej: 2022060063">
+  </div>
+
+  <div class="w-full md:flex-[2]">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo:</label>
+    <input type="text" name="nombreCompleto" [(ngModel)]="estudianteForm.nombreCompleto" required minlength="3" #nom="ngModel"
+           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+           [class.border-red-500]="nom.invalid && (nom.dirty || nom.touched)"
+           [class.border-gray-300]="nom.valid || !(nom.dirty || nom.touched)"
+           placeholder="Ingresa el nombre">
+  </div>
+
+  <div class="w-full md:flex-[1.5]">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Carrera:</label>
+    <input type="text" name="carrera" [(ngModel)]="estudianteForm.carrera" required #car="ngModel"
+           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+           [class.border-red-500]="car.invalid && (car.dirty || car.touched)"
+           [class.border-gray-300]="car.valid || !(car.dirty || car.touched)"
+           placeholder="Ej: Informática">
+  </div>
+
+  <div class="flex gap-2 w-full md:w-auto justify-end">
+    <button type="submit" [disabled]="miFormulario.invalid"
+            class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold px-5 py-2 rounded-md transition duration-200 shadow-sm">
+      {{ editando ? 'Actualizar' : 'Registrar' }}
+    </button>
+    <button type="button" *ngIf="editando" (click)="limpiarFormulario()" 
+            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition duration-200">
+      Cancelar
+    </button>
+  </div>
+
+</form>
+  </div>
+
+  <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+    <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
+      <thead class="bg-blue-600 text-white text-xs uppercase tracking-wider">
+        <tr>
+          <th scope="col" class="px-6 py-4 font-semibold">Matrícula</th>
+          <th scope="col" class="px-6 py-4 font-semibold">Nombre Completo</th>
+          <th scope="col" class="px-6 py-4 font-semibold">Carrera</th>
+          <th scope="col" class="px-6 py-4 font-semibold text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 border-t border-gray-200">
+        <tr *ngFor="let e of estudiantes" class="hover:bg-gray-50 transition duration-150">
+          <td class="px-6 py-4 font-bold text-gray-900">{{ e.matricula }}</td>
+          <td class="px-6 py-4 text-gray-700">{{ e.nombreCompleto }}</td>
+          <td class="px-6 py-4 text-gray-700">
+            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+              {{ e.carrera }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex justify-center gap-3">
+              <button (click)="seleccionarParaEditar(e)" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-3 py-1.5 rounded text-xs transition">
+                Editar
+              </button>
+              <button (click)="eliminar(e.matricula)" class="bg-red-600 hover:bg-red-700 text-white font-medium px-3 py-1.5 rounded text-xs transition">
+                Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="estudiantes.length === 0">
+          <td colspan="4" class="px-6 py-10 text-center text-gray-400 italic">
+            No hay estudiantes registrados en el sistema.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
