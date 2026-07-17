@@ -12,7 +12,7 @@ export class EstudianteService {
 
   constructor(private http: HttpClient) { }
 
-  // Obtener todos
+ // Burcar estudiante
  getEstudiantes(buscar?: string): Observable<Estudiante[]> {
   let params = new HttpParams();
   if (buscar) {

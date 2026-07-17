@@ -1,29 +1,29 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // <-- IMPORTANTE para los inputs
-import { Estudiante } from '../../models/estudiante.model';
+import { CommonModule } from '@angular/common'; 
+import { FormsModule } from '@angular/forms';     
 import { EstudianteService } from '../../services/estudiante.service';
+import { Estudiante } from '../../models/estudiante.model';
 
 @Component({
   selector: 'app-estudiante-crud',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  standalone: true, 
+  imports: [CommonModule, FormsModule], 
   templateUrl: './estudiante-crud.component.html',
   styleUrls: ['./estudiante-crud.component.css']
 })
 export class EstudianteCrudComponent implements OnInit {
+  
   estudiantes: Estudiante[] = [];
   
- 
   estudianteForm: any = {
-  matricula: null,
-  nombreCompleto: '',
-  carrera: ''
-};
+    matricula: null,
+    nombreCompleto: '',
+    carrera: ''
+  };
 
+  editando: boolean = false;
   matriculaBuscar: number | null = null;
   filtrado: boolean = false;
-  editando: boolean = false;
 
   constructor(private estudianteService: EstudianteService) { }
 
@@ -31,80 +31,88 @@ export class EstudianteCrudComponent implements OnInit {
     this.listar();
   }
 
+  // OBTENER TODOS
   listar(): void {
     this.estudianteService.getEstudiantes().subscribe({
       next: (res) => this.estudiantes = res,
-      error: (err) => console.error('Error al obtener datos', err)
+      error: (err) => console.error('Error al cargar estudiantes', err)
     });
   }
 
+  // BUSCAR POR MATRÍCULA
+  buscarPorMatricula(): void {
+    if (!this.matriculaBuscar) {
+      this.restaurarLista();
+      return;
+    }
+    this.estudianteService.getEstudiantes(this.matriculaBuscar.toString()).subscribe({
+      next: (res) => {
+        this.estudiantes = res;
+        this.filtrado = true;
+      },
+      error: (err) => {
+        console.error(err);
+        this.estudiantes = [];
+        this.filtrado = true;
+      }
+    });
+  }
+
+  restaurarLista(): void {
+    this.matriculaBuscar = null;
+    this.filtrado = false;
+    this.listar();
+  }
+
+  // GUARDAR O ACTUALIZAR
   guardar(): void {
+    if (!this.estudianteForm.matricula || !this.estudianteForm.nombreCompleto || !this.estudianteForm.carrera) {
+      alert('Por favor, llena todos los campos');
+      return;
+    }
+
     if (this.editando) {
-      // Actualizar registro existente
       this.estudianteService.actualizarEstudiante(this.estudianteForm.matricula, this.estudianteForm).subscribe({
         next: () => {
-          this.listar();
+          alert('Estudiante actualizado con éxito');
           this.limpiarFormulario();
+          this.listar();
         },
-        error: (err) => console.error(err)
+        error: (err) => console.error('Error al actualizar', err)
       });
     } else {
-      // Crear nuevo registro (recuerda que la matrícula debe tener 10 dígitos)
       this.estudianteService.crearEstudiante(this.estudianteForm).subscribe({
         next: () => {
-          this.listar();
+          alert('Estudiante registrado con éxito');
           this.limpiarFormulario();
+          this.listar();
         },
-        error: (err) => alert('Error al registrar. Revisa que la matrícula tenga 10 dígitos.')
+        error: (err) => alert(err.error?.detail || 'La matrícula ya existe o hay un error')
       });
     }
   }
 
-  seleccionarParaEditar(e: Estudiante): void {
-    this.estudianteForm = { ...e }; // Clonamos el objeto
+  // Mapear los datos al formulario para editar
+  seleccionarParaEditar(estudiante: Estudiante): void {
+    this.estudianteForm = { ...estudiante };
     this.editando = true;
   }
 
+  // ELIMINAR
   eliminar(matricula: number): void {
     if (confirm('¿Estás seguro de eliminar este estudiante?')) {
       this.estudianteService.eliminarEstudiante(matricula).subscribe({
-        next: () => this.listar(),
-        error: (err) => console.error(err)
+        next: () => {
+          alert('Estudiante eliminado');
+          this.listar();
+        },
+        error: (err) => console.error('Error al eliminar', err)
       });
     }
   }
 
   limpiarFormulario(): void {
-  this.estudianteForm = { 
-    matricula: null, 
-    nombreCompleto: '', 
-    carrera: '' 
-  };
-  this.editando = false;
-}
-
-buscarPorMatricula(): void {
-  if (!this.matriculaBuscar) {
-    this.restaurarLista();
-    return;
+    this.estudianteForm = { matricula: null, nombreCompleto: '', carrera: '' };
+    this.editando = false;
   }
-
-  this.estudianteService.getEstudiantes(this.matriculaBuscar.toString()).subscribe({
-    next: (res) => {
-      this.estudiantes = res;
-      this.filtrado = true;
-    },
-    error: (err) => {
-      console.error('Error al buscar al alumno en el servidor', err);
-      this.estudiantes = []; // Limpia la tabla si hay error o no lo encuentra
-      this.filtrado = true;
-    }
-  });
-}
-
-restaurarLista(): void {
-  this.matriculaBuscar = null;
-  this.filtrado = false;
-  this.listar(); // Llama a tu función original que descarga todos los estudiantes
-}
 }
